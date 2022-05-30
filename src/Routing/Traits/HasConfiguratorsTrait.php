@@ -22,7 +22,9 @@ declare(strict_types=1);
 namespace Whoa\Core\Routing\Traits;
 
 use LogicException;
-use Whoa\Contracts\Container\ContainerInterface as WhaoContainerInterface;
+use ReflectionException;
+use Whoa\Contracts\Container\ContainerInterface as WhoaContainerInterface;
+
 use function array_merge;
 
 /**
@@ -35,17 +37,18 @@ trait HasConfiguratorsTrait
     /**
      * @var callable[]
      */
-    private $configurators = [];
+    private array $configurators = [];
 
     /**
      * @param callable[] $configurators
      *
      * @return self
+     * @throws ReflectionException
      */
     public function setConfigurators(array $configurators): self
     {
         foreach ($configurators as $configurator) {
-            $isValid = $this->checkPublicStaticCallable($configurator, [WhaoContainerInterface::class]);
+            $isValid = $this->checkPublicStaticCallable($configurator, [WhoaContainerInterface::class]);
             if ($isValid === false) {
                 throw new LogicException($this->getCallableToCacheMessage());
             }
@@ -60,6 +63,7 @@ trait HasConfiguratorsTrait
      * @param callable[] $configurators
      *
      * @return self
+     * @throws ReflectionException
      */
     public function addConfigurators(array $configurators): self
     {
