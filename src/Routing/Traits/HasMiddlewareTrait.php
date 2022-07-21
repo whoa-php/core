@@ -26,11 +26,13 @@ use LogicException;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+
+use ReflectionException;
+
 use function array_merge;
 
 /**
  * @package Whoa\Core
- *
  * @method string getCallableToCacheMessage();
  */
 trait HasMiddlewareTrait
@@ -38,12 +40,12 @@ trait HasMiddlewareTrait
     /**
      * @var callable[]
      */
-    private $middleware = [];
+    private array $middleware = [];
 
     /**
      * @param callable[] $middleware
-     *
      * @return self
+     * @throws ReflectionException
      */
     public function setMiddleware(array $middleware): self
     {
@@ -65,8 +67,8 @@ trait HasMiddlewareTrait
 
     /**
      * @param callable[] $middleware
-     *
      * @return self
+     * @throws ReflectionException
      */
     public function addMiddleware(array $middleware): self
     {

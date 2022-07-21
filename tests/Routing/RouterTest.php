@@ -26,6 +26,8 @@ use FastRoute\DataGenerator\CharCountBased as CharCountBasedGenerator;
 use FastRoute\DataGenerator\GroupCountBased as GroupCountBasedGenerator;
 use FastRoute\DataGenerator\GroupPosBased as GroupPosBasedGenerator;
 use FastRoute\DataGenerator\MarkBased as MarkBasedGenerator;
+use Laminas\Diactoros\ServerRequest;
+use Laminas\Diactoros\Uri;
 use Whoa\Contracts\Core\SapiInterface;
 use Whoa\Contracts\Routing\GroupInterface;
 use Whoa\Contracts\Routing\RouteInterface;
@@ -42,8 +44,6 @@ use Mockery;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use ReflectionException;
-use Zend\Diactoros\ServerRequest;
-use Zend\Diactoros\Uri;
 
 /**
  * @package Whoa\Tests\Core
@@ -51,11 +51,10 @@ use Zend\Diactoros\Uri;
 class RouterTest extends TestCase
 {
     /** Test route name */
-    const ROUTE_NAME_DELETE_POST = 'deletePost';
+    public const ROUTE_NAME_DELETE_POST = 'deletePost';
 
     /**
      * Test match routes.
-     *
      * @throws Exception
      */
     public function testMatchForGroupCountBasedRouter(): void
@@ -65,7 +64,6 @@ class RouterTest extends TestCase
 
     /**
      * Test match routes.
-     *
      * @throws Exception
      */
     public function testMatchForGroupPosBasedRouter(): void
@@ -85,7 +83,6 @@ class RouterTest extends TestCase
 
     /**
      * Test match routes.
-     *
      * @throws Exception
      */
     public function testMatchForMarkBasedRouter(): void
@@ -95,7 +92,6 @@ class RouterTest extends TestCase
 
     /**
      * Test loading of cached data.
-     *
      * @throws Exception
      */
     public function testLoadCachedRoutes(): void
@@ -123,7 +119,6 @@ class RouterTest extends TestCase
 
     /**
      * Test compose URI for named route with parameters.
-     *
      * @throws Exception
      */
     public function testRouterGetNamedRouteWithParams(): void
@@ -144,7 +139,6 @@ class RouterTest extends TestCase
 
     /**
      * Test extract host URI from server request.
-     *
      * @throws Exception
      */
     public function testGetHostUri(): void
@@ -158,7 +152,6 @@ class RouterTest extends TestCase
 
     /**
      * @param RouterInterface $router
-     *
      * @throws Exception
      */
     private function checkMatchRoutes(RouterInterface $router): void
@@ -204,7 +197,6 @@ class RouterTest extends TestCase
 
     /**
      * @return GroupInterface
-     *
      * @throws ReflectionException
      */
     private function createGroup(): GroupInterface
@@ -215,9 +207,9 @@ class RouterTest extends TestCase
                 $group
                     ->get('', [self::class, 'postsIndex'])
                     ->post('', [self::class, 'postsCreate'], [
-                        RouteInterface::PARAM_MIDDLEWARE_LIST         => [self::class . '::createPostMiddleware'],
+                        RouteInterface::PARAM_MIDDLEWARE_LIST => [self::class . '::createPostMiddleware'],
                         RouteInterface::PARAM_CONTAINER_CONFIGURATORS => [self::class . '::createPostConfigurator'],
-                        RouteInterface::PARAM_REQUEST_FACTORY         => [self::class, 'createRequest'],
+                        RouteInterface::PARAM_REQUEST_FACTORY => [self::class, 'createRequest'],
                     ])
                     ->delete('{id:\d+}', [self::class, 'postsDelete'], [
                         RouteInterface::PARAM_NAME => self::ROUTE_NAME_DELETE_POST,
@@ -264,9 +256,7 @@ class RouterTest extends TestCase
     public static function homeIndex(): ResponseInterface
     {
         /** @var ResponseInterface $response */
-        $response = Mockery::mock(ResponseInterface::class);
-
-        return $response;
+        return Mockery::mock(ResponseInterface::class);
     }
 
     /**
@@ -275,9 +265,7 @@ class RouterTest extends TestCase
     public static function createNews(): ResponseInterface
     {
         /** @var ResponseInterface $response */
-        $response = Mockery::mock(ResponseInterface::class);
-
-        return $response;
+        return Mockery::mock(ResponseInterface::class);
     }
 
     /**
@@ -286,9 +274,7 @@ class RouterTest extends TestCase
     public static function postsIndex(): ResponseInterface
     {
         /** @var ResponseInterface $response */
-        $response = Mockery::mock(ResponseInterface::class);
-
-        return $response;
+        return Mockery::mock(ResponseInterface::class);
     }
 
     /**
@@ -297,14 +283,11 @@ class RouterTest extends TestCase
     public static function postsCreate(): ResponseInterface
     {
         /** @var ResponseInterface $response */
-        $response = Mockery::mock(ResponseInterface::class);
-
-        return $response;
+        return Mockery::mock(ResponseInterface::class);
     }
 
     /**
      * @param array $parameters
-     *
      * @return ResponseInterface
      */
     public static function postsDelete(array $parameters): ResponseInterface
@@ -312,14 +295,11 @@ class RouterTest extends TestCase
         $parameters ?: null;
 
         /** @var ResponseInterface $response */
-        $response = Mockery::mock(ResponseInterface::class);
-
-        return $response;
+        return Mockery::mock(ResponseInterface::class);
     }
 
     /**
      * @param SapiInterface $sapi
-     *
      * @return ServerRequestInterface
      */
     public static function createRequest(SapiInterface $sapi): ServerRequestInterface
@@ -327,9 +307,7 @@ class RouterTest extends TestCase
         $sapi ?: null;
 
         /** @var ServerRequestInterface $request */
-        $request = Mockery::mock(ServerRequestInterface::class);
-
-        return $request;
+        return Mockery::mock(ServerRequestInterface::class);
     }
 
     /**
@@ -338,9 +316,7 @@ class RouterTest extends TestCase
     public static function createPostMiddleware(): ResponseInterface
     {
         /** @var ResponseInterface $response */
-        $response = Mockery::mock(ResponseInterface::class);
-
-        return $response;
+        return Mockery::mock(ResponseInterface::class);
     }
 
     public static function createPostConfigurator(): void

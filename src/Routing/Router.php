@@ -32,6 +32,7 @@ use Whoa\Contracts\Routing\RouteInterface;
 use Whoa\Contracts\Routing\RouterInterface;
 use LogicException;
 use Psr\Http\Message\ServerRequestInterface;
+
 use function assert;
 use function array_key_exists;
 use function array_merge;
@@ -52,17 +53,17 @@ class Router implements RouterInterface
     /**
      * @var string
      */
-    private $generatorClass;
+    private string $generatorClass;
 
     /**
      * @var string
      */
-    private $dispatcherClass;
+    private string $dispatcherClass;
 
     /**
      * @var DispatcherInterface
      */
-    private $dispatcher;
+    private DispatcherInterface $dispatcher;
 
     /**
      * @param string $generatorClass
@@ -73,22 +74,19 @@ class Router implements RouterInterface
         assert(static::classImplements($generatorClass, DataGenerator::class));
         assert(static::classImplements($dispatcherClass, Dispatcher::class));
 
-        $this->generatorClass  = $generatorClass;
+        $this->generatorClass = $generatorClass;
         $this->dispatcherClass = $dispatcherClass;
     }
 
     /**
      * @inheritdoc
-     *
-     * PHPMD sees `out` parameters from functions as undefined.
-     * @SuppressWarnings(PHPMD.UndefinedVariable)
      */
     public function getCachedRoutes(GroupInterface $group): array
     {
         $collector = $this->createRouteCollector();
 
-        $routeIndex         = 0;
-        $allRoutesInfo      = [];
+        $routeIndex = 0;
+        $allRoutesInfo = [];
         $namedRouteUriPaths = [];
         foreach ($group->getRoutes() as $route) {
             /** @var RouteInterface $route */
@@ -167,9 +165,7 @@ class Router implements RouterInterface
 
         [, , $namedRouteUriPaths] = $this->cachedRoutes;
 
-        $result = array_key_exists($routeName, $namedRouteUriPaths) === true ? $namedRouteUriPaths[$routeName] : null;
-
-        return $result;
+        return array_key_exists($routeName, $namedRouteUriPaths) === true ? $namedRouteUriPaths[$routeName] : null;
     }
 
     /**
@@ -180,13 +176,10 @@ class Router implements RouterInterface
         string $routeName,
         array $placeholders = [],
         array $queryParams = []
-    ): string
-    {
+    ): string {
         $path = $this->getUriPath($routeName);
         $path = $path === null ? $path : $this->replacePlaceholders($path, $placeholders);
-        $url  = empty($queryParams) === true ? "$hostUri$path" : "$hostUri$path?" . http_build_query($queryParams);
-
-        return $url;
+        return empty($queryParams) === true ? "$hostUri$path" : "$hostUri$path?" . http_build_query($queryParams);
     }
 
     /**
@@ -194,13 +187,11 @@ class Router implements RouterInterface
      */
     public function getHostUri(ServerRequestInterface $request): string
     {
-        $uri       = $request->getUri();
+        $uri = $request->getUri();
         $uriScheme = $uri->getScheme();
-        $uriHost   = $uri->getHost();
-        $uriPort   = $uri->getPort();
-        $hostUri   = empty($uriPort) === true ? "$uriScheme://$uriHost" : "$uriScheme://$uriHost:$uriPort";
-
-        return $hostUri;
+        $uriHost = $uri->getHost();
+        $uriPort = $uri->getPort();
+        return empty($uriPort) === true ? "$uriScheme://$uriHost" : "$uriScheme://$uriHost:$uriPort";
     }
 
     /**
@@ -208,7 +199,7 @@ class Router implements RouterInterface
      */
     protected function createRouteCollector(): RouteCollector
     {
-        return new RouteCollector(new Std(), new $this->generatorClass);
+        return new RouteCollector(new Std(), new $this->generatorClass());
     }
 
     /**
@@ -216,50 +207,46 @@ class Router implements RouterInterface
      */
     protected function createDispatcher(): DispatcherInterface
     {
-        return new $this->dispatcherClass;
+        return new $this->dispatcherClass();
     }
 
     /**
      * @param string $path
-     * @param array  $placeholders
-     *
+     * @param array $placeholders
      * @return string
-     *
-     * @SuppressWarnings(PHPMD.ElseExpression)
      */
     private function replacePlaceholders(string $path, array $placeholders): string
     {
-        $result            = '';
-        $inPlaceholder     = false;
-        $curPlaceholder    = null;
+        $result = '';
+        $inPlaceholder = false;
+        $curPlaceholder = null;
         $inPlaceholderName = false;
-        $pathLength        = strlen($path);
+        $pathLength = strlen($path);
         for ($index = 0; $index < $pathLength; ++$index) {
             $character = $path[$index];
             switch ($character) {
                 case '{':
                     assert($inPlaceholder === false, 'Nested placeholders (e.g. `{{}}}` are not allowed.');
-                    $inPlaceholder     = true;
+                    $inPlaceholder = true;
                     $inPlaceholderName = true;
                     break;
                 case '}':
                     $result .= array_key_exists($curPlaceholder, $placeholders) === true ?
                         $placeholders[$curPlaceholder] : '{' . $curPlaceholder . '}';
 
-                    $inPlaceholder     = false;
-                    $curPlaceholder    = null;
+                    $inPlaceholder = false;
+                    $curPlaceholder = null;
                     $inPlaceholderName = false;
                     break;
                 default:
                     if ($inPlaceholder === false) {
                         $result .= $character;
-                    } else {
-                        if ($character === ':') {
-                            $inPlaceholderName = false;
-                        } elseif ($inPlaceholderName === true) {
-                            $curPlaceholder .= $character;
-                        }
+                    } elseif ($character === ':') {
+                        $inPlaceholderName = false;
+                    } elseif ($inPlaceholderName === true) {
+                        $curPlaceholder .= $character;
                     }
+
                     break;
             }
         }
@@ -279,10 +266,9 @@ class Router implements RouterInterface
 
     /**
      * @param RouteInterface $route
-     * @param array          $namedRouteUriPaths
-     * @param null|string    $url
-     * @param null|string    $otherUrl
-     *
+     * @param array $namedRouteUriPaths
+     * @param null|string $url
+     * @param null|string $otherUrl
      * @return bool
      */
     private function checkRouteNameIsUnique(
@@ -290,12 +276,11 @@ class Router implements RouterInterface
         array $namedRouteUriPaths,
         ?string &$url,
         ?string &$otherUrl
-    ): bool
-    {
+    ): bool {
         // check is really simple, the main purpose of the method is to prepare data for assert
         $isUnique = array_key_exists($route->getName(), $namedRouteUriPaths) === false;
 
-        $url      = $isUnique === true ? null : $route->getUriPath();
+        $url = $isUnique === true ? null : $route->getUriPath();
         $otherUrl = $isUnique === true ? null : $namedRouteUriPaths[$route->getName()];
 
         return $isUnique;

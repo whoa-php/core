@@ -29,7 +29,6 @@ use function array_merge;
 
 /**
  * @package Whoa\Core
- *
  * @method string getCallableToCacheMessage();
  */
 trait HasConfiguratorsTrait
@@ -41,7 +40,6 @@ trait HasConfiguratorsTrait
 
     /**
      * @param callable[] $configurators
-     *
      * @return self
      * @throws ReflectionException
      */
@@ -61,7 +59,6 @@ trait HasConfiguratorsTrait
 
     /**
      * @param callable[] $configurators
-     *
      * @return self
      * @throws ReflectionException
      */

@@ -22,11 +22,11 @@ declare(strict_types=1);
 namespace Whoa\Tests\Core\Application;
 
 use Exception;
+use Laminas\HttpHandlerRunner\Emitter\EmitterInterface;
 use Whoa\Core\Application\Sapi;
 use Whoa\Tests\Core\TestCase;
 use Mockery;
 use Psr\Http\Message\ResponseInterface;
-use Zend\HttpHandlerRunner\Emitter\EmitterInterface;
 
 /**
  * @package Whoa\Tests\Core

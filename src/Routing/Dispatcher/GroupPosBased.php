@@ -23,6 +23,7 @@ namespace Whoa\Core\Routing\Dispatcher;
 
 use Whoa\Contracts\Routing\DispatcherInterface;
 use Whoa\Core\Routing\Traits\DispatcherTrait;
+
 use function assert;
 
 /**
@@ -32,13 +33,12 @@ class GroupPosBased extends \FastRoute\Dispatcher\GroupPosBased implements Dispa
 {
     use DispatcherTrait;
 
-    /** @noinspection PhpMissingParentConstructorInspection
+    /**
      * Constructor.
      */
     public function __construct()
     {
         assert($this->areCodeValid() === true);
-
         // Suppress parent constructor. Use `setData` instead.
     }
 

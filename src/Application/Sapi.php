@@ -27,6 +27,12 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
 
+use function Laminas\Diactoros\marshalHeadersFromSapi;
+use function Laminas\Diactoros\marshalMethodFromSapi;
+use function Laminas\Diactoros\marshalUriFromSapi;
+use function Laminas\Diactoros\normalizeServer;
+use function Laminas\Diactoros\normalizeUploadedFiles;
+
 /**
  * @package Whoa\Core
  */
@@ -35,22 +41,22 @@ class Sapi implements SapiInterface
     /**
      * @var EmitterInterface
      */
-    private $sapiEmitter;
+    private EmitterInterface $sapiEmitter;
 
     /**
      * @var array
      */
-    private $server;
+    private array $server;
 
     /**
      * @var array
      */
-    private $files;
+    private array $files;
 
     /**
      * @var array
      */
-    private $headers;
+    private array $headers;
 
     /**
      * @var UriInterface
@@ -60,17 +66,17 @@ class Sapi implements SapiInterface
     /**
      * @var string
      */
-    private $method;
+    private string $method;
 
     /**
      * @var array
      */
-    private $cookies;
+    private array $cookies;
 
     /**
      * @var array
      */
-    private $queryParams;
+    private array $queryParams;
 
     /**
      * @var array|object
@@ -85,22 +91,18 @@ class Sapi implements SapiInterface
     /**
      * @var string
      */
-    private $protocolVersion;
+    private string $protocolVersion;
 
     /**
      * Sapi constructor.
-     *
-     * @param EmitterInterface                $sapiEmitter
-     * @param array|null                      $server
-     * @param array|null                      $queryParams
-     * @param array|object|null               $parsedBody
-     * @param array|null                      $cookies
-     * @param array|null                      $files
+     * @param EmitterInterface $sapiEmitter
+     * @param array|null $server
+     * @param array|null $queryParams
+     * @param array|object|null $parsedBody
+     * @param array|null $cookies
+     * @param array|null $files
      * @param string|resource|StreamInterface $messageBody
-     * @param string                          $protocolVersion
-     *
-     * @SuppressWarnings(PHPMD.StaticAccess)
-     * @SuppressWarnings(PHPMD.Superglobals)
+     * @param string $protocolVersion
      */
     public function __construct(
         EmitterInterface $sapiEmitter,
@@ -111,20 +113,19 @@ class Sapi implements SapiInterface
         array $files = null,
         $messageBody = 'php://input',
         string $protocolVersion = '1.1'
-    )
-    {
+    ) {
         $this->sapiEmitter = $sapiEmitter;
 
         // Code below based on ServerRequestFactory::fromGlobals
-        $this->server          = \Zend\Diactoros\normalizeServer($server ?? $_SERVER);
-        $this->files           = \Zend\Diactoros\normalizeUploadedFiles($files ?? $_FILES);
-        $this->headers         = \Zend\Diactoros\marshalHeadersFromSapi($this->server);
-        $this->uri             = \Zend\Diactoros\marshalUriFromSapi($this->server, $this->headers);
-        $this->method          = \Zend\Diactoros\marshalMethodFromSapi($this->server);
-        $this->cookies         = $cookies ?? $_COOKIE;
-        $this->queryParams     = $queryParams ?? $_GET;
-        $this->parsedBody      = $parsedBody ?? $_POST;
-        $this->messageBody     = $messageBody;
+        $this->server = normalizeServer($server ?? $_SERVER);
+        $this->files = normalizeUploadedFiles($files ?? $_FILES);
+        $this->headers = marshalHeadersFromSapi($this->server);
+        $this->uri = marshalUriFromSapi($this->server, $this->headers);
+        $this->method = marshalMethodFromSapi($this->server);
+        $this->cookies = $cookies ?? $_COOKIE;
+        $this->queryParams = $queryParams ?? $_GET;
+        $this->parsedBody = $parsedBody ?? $_POST;
+        $this->messageBody = $messageBody;
         $this->protocolVersion = $protocolVersion;
     }
 

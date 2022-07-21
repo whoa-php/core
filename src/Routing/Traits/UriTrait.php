@@ -31,32 +31,28 @@ trait UriTrait
 {
     /**
      * @param string $uri
-     * @param bool   $trailingSlash
-     *
+     * @param bool $trailingSlash
      * @return string
      */
     protected function normalizeUri(string $uri, bool $trailingSlash): string
     {
         // add starting '/' and cut ending '/' if necessary
-        $uri       = strlen($uri) > 0 && $uri[0] === '/' ? $uri : '/' . $uri;
+        $uri = strlen($uri) > 0 && $uri[0] === '/' ? $uri : '/' . $uri;
         $prefixLen = strlen($uri);
-        $uri       = $prefixLen > 1 && substr($uri, -1) === '/' ? substr($uri, 0, $prefixLen - 1) : $uri;
+        $uri = $prefixLen > 1 && substr($uri, -1) === '/' ? substr($uri, 0, $prefixLen - 1) : $uri;
 
         // feature: trailing slashes are possible when asked
-        $uri = $trailingSlash === true && substr($uri, -1) !== '/' ? $uri . '/' : $uri;
-
-        return $uri;
+        return $trailingSlash === true && substr($uri, -1) !== '/' ? $uri . '/' : $uri;
     }
 
     /**
      * @param string $uri1
      * @param string $uri2
-     *
      * @return string
      */
     protected function concatUri(string $uri1, string $uri2): string
     {
-        $fEndsWithSlash   = strlen($uri1) > 0 && substr($uri1, -1) === '/';
+        $fEndsWithSlash = strlen($uri1) > 0 && substr($uri1, -1) === '/';
         $sStartsWithSlash = strlen($uri2) > 0 && $uri2[0] === '/';
 
         // only one has '/'
@@ -66,8 +62,6 @@ trait UriTrait
 
         // either both have '/' nor both don't have
 
-        $result = $fEndsWithSlash === true ? $uri1 . substr($uri2, 1) : $uri1 . '/' . $uri2;
-
-        return $result;
+        return $fEndsWithSlash === true ? $uri1 . substr($uri2, 1) : $uri1 . '/' . $uri2;
     }
 }

@@ -31,7 +31,7 @@ trait ThrowableResponseTrait
     /**
      * @var Throwable
      */
-    private $throwable;
+    private Throwable $throwable;
 
     /**
      * @return Throwable
@@ -43,7 +43,6 @@ trait ThrowableResponseTrait
 
     /**
      * @param Throwable $throwable
-     *
      * @return self
      */
     protected function setThrowable(Throwable $throwable): self

@@ -24,6 +24,10 @@ namespace Whoa\Tests\Core\Application;
 use Closure;
 use Exception;
 use FastRoute\DataGenerator\GroupCountBased as GroupCountBasedGenerator;
+use Laminas\Diactoros\Response\TextResponse;
+use Laminas\Diactoros\ServerRequestFactory;
+use Laminas\HttpHandlerRunner\Emitter\EmitterInterface;
+use Psr\Container\ContainerExceptionInterface;
 use Whoa\Container\Container;
 use Whoa\Contracts\Container\ContainerInterface as WhoaContainerInterface;
 use Whoa\Contracts\Core\SapiInterface;
@@ -49,9 +53,6 @@ use Psr\Http\Message\StreamInterface;
 use ReflectionException;
 use ReflectionMethod;
 use Throwable;
-use Zend\Diactoros\Response\TextResponse;
-use Zend\Diactoros\ServerRequestFactory;
-use Zend\HttpHandlerRunner\Emitter\EmitterInterface;
 
 /**
  * @package Whoa\Tests\Core
@@ -59,42 +60,42 @@ use Zend\HttpHandlerRunner\Emitter\EmitterInterface;
 class ApplicationTest extends TestCase
 {
     /** Filed name for storing response in SAPI mock */
-    const FIELD_RESPONSE = 'response';
+    public const FIELD_RESPONSE = 'response';
 
     /**
      * @var bool
      */
-    private static $isRouteConfiguratorCalled;
+    private static bool $isRouteConfiguratorCalled;
 
     /**
      * @var bool
      */
-    private static $isGlobalConfiguratorCalled;
+    private static bool $isGlobalConfiguratorCalled;
 
     /**
      * @var bool
      */
-    private static $isGlobalMiddleware1Called;
+    private static bool $isGlobalMiddleware1Called;
 
     /**
      * @var bool
      */
-    private static $isGlobalMiddleware2Called;
+    private static bool $isGlobalMiddleware2Called;
 
     /**
      * @var bool
      */
-    private static $isRouteMiddlewareCalled;
+    private static bool $isRouteMiddlewareCalled;
 
     /**
      * @var bool
      */
-    private static $isRequestFactoryCalled;
+    private static bool $isRequestFactoryCalled;
 
     /**
      * @var bool
      */
-    private static $isHomeIndexCalled;
+    private static bool $isHomeIndexCalled;
 
     /**
      * Set up tests.
@@ -104,17 +105,16 @@ class ApplicationTest extends TestCase
         parent::setUp();
 
         self::$isGlobalConfiguratorCalled = false;
-        self::$isRouteConfiguratorCalled  = false;
-        self::$isGlobalMiddleware1Called  = false;
-        self::$isGlobalMiddleware2Called  = false;
-        self::$isRouteMiddlewareCalled    = false;
-        self::$isRequestFactoryCalled     = false;
-        self::$isHomeIndexCalled          = false;
+        self::$isRouteConfiguratorCalled = false;
+        self::$isGlobalMiddleware1Called = false;
+        self::$isGlobalMiddleware2Called = false;
+        self::$isRouteMiddlewareCalled = false;
+        self::$isRequestFactoryCalled = false;
+        self::$isHomeIndexCalled = false;
     }
 
     /**
      * Test page.
-     *
      * @throws Exception
      */
     public function testHomeIndex(): void
@@ -139,7 +139,6 @@ class ApplicationTest extends TestCase
 
     /**
      * Test page.
-     *
      * @throws Exception
      */
     public function testPostsIndex(): void
@@ -162,8 +161,8 @@ class ApplicationTest extends TestCase
 
     /**
      * Test page.
-     *
-     * @throws Exception
+     * @throws ReflectionException
+     * @throws ContainerExceptionInterface
      */
     public function test404(): void
     {
@@ -185,8 +184,8 @@ class ApplicationTest extends TestCase
 
     /**
      * Test page.
-     *
-     * @throws Exception
+     * @throws ContainerExceptionInterface
+     * @throws ReflectionException
      */
     public function test405(): void
     {
@@ -209,6 +208,7 @@ class ApplicationTest extends TestCase
 
     /**
      * Test Application not configured.
+     * @throws ContainerExceptionInterface
      */
     public function testSapiNotSet(): void
     {
@@ -223,8 +223,8 @@ class ApplicationTest extends TestCase
 
     /**
      * Test user can ask not to create request.
-     *
-     * @throws Exception
+     * @throws ContainerExceptionInterface
+     * @throws ReflectionException
      */
     public function testNoRequestInController(): void
     {
@@ -246,8 +246,7 @@ class ApplicationTest extends TestCase
 
     /**
      * Test error handling.
-     *
-     * @throws Exception
+     * @throws ContainerExceptionInterface
      */
     public function testErrorHandling(): void
     {
@@ -256,9 +255,7 @@ class ApplicationTest extends TestCase
             /** @var Application $app */
             [$app, $sapi] = $this->createApp('GET', $uri, $this->getRoutesDataForErrorsTesting(), [], $container);
             $app->run();
-            $response = $sapi->{self::FIELD_RESPONSE};
-
-            return $response;
+            return $sapi->{self::FIELD_RESPONSE};
         };
 
         /** @var ThrowableResponseInterface $response */
@@ -298,15 +295,15 @@ class ApplicationTest extends TestCase
 
     /**
      * Test page.
-     *
-     * @throws Exception
+     * @throws ContainerExceptionInterface
+     * @throws ReflectionException
      */
     public function testHomeIndexFaultyMiddleware(): void
     {
         /** @var Application $app */
         /** @var SapiInterface $sapi */
         $faultyMiddleware = [self::class, 'faultyMiddlewareItem'];
-        $container        = new Container();
+        $container = new Container();
         [$app, $sapi] = $this
             ->createApp('GET', '/', $this->getRoutesData(), [$faultyMiddleware], $container);
         $app->run();
@@ -328,8 +325,8 @@ class ApplicationTest extends TestCase
 
     /**
      * Test page.
-     *
-     * @throws Exception
+     * @throws ContainerExceptionInterface
+     * @throws ReflectionException
      */
     public function testGetRouter(): void
     {
@@ -343,12 +340,11 @@ class ApplicationTest extends TestCase
     }
 
     /**
-     * @param string                      $method
-     * @param string                      $uri
-     * @param array                       $routesData
-     * @param array|null                  $globalMiddleware
+     * @param string $method
+     * @param string $uri
+     * @param array $routesData
+     * @param array|null $globalMiddleware
      * @param WhoaContainerInterface|null $container
-     *
      * @return array
      */
     private function createApp(
@@ -357,15 +353,13 @@ class ApplicationTest extends TestCase
         array $routesData,
         array $globalMiddleware = null,
         WhoaContainerInterface $container = null
-    ): array
-    {
-
+    ): array {
         if ($container === null) {
             /** @var Mock $container */
             $container = Mockery::mock(WhoaContainerInterface::class);
         }
 
-        $server['REQUEST_URI']    = $uri;
+        $server['REQUEST_URI'] = $uri;
         $server['REQUEST_METHOD'] = $method;
 
         /** @var EmitterInterface $emitter */
@@ -381,9 +375,9 @@ class ApplicationTest extends TestCase
 
         $globalMiddleware = $globalMiddleware ??
             [[self::class, 'globalMiddlewareItem1'], [self::class, 'globalMiddlewareItem2']];
-        $coreData         = (new CoreData())
+        $coreData = (new CoreData())
             ->setRouterParameters([
-                CoreData::KEY_ROUTER_PARAMS__GENERATOR  => GroupCountBasedGenerator::class,
+                CoreData::KEY_ROUTER_PARAMS__GENERATOR => GroupCountBasedGenerator::class,
                 CoreData::KEY_ROUTER_PARAMS__DISPATCHER => GroupCountBasedDispatcher::class,
             ])->setRoutesData($routesData)
             ->setGlobalConfigurators([[self::class, 'createGlobalConfigurator']])
@@ -401,7 +395,6 @@ class ApplicationTest extends TestCase
 
     /**
      * @return array
-     *
      * @throws ReflectionException
      */
     private function getRoutesData(): array
@@ -411,38 +404,34 @@ class ApplicationTest extends TestCase
             ->group('posts', function (GroupInterface $group) {
                 $group
                     ->post('', [self::class, 'postsCreate'], [
-                        GroupInterface::PARAM_MIDDLEWARE_LIST         => [self::class . '::createPostMiddleware'],
+                        GroupInterface::PARAM_MIDDLEWARE_LIST => [self::class . '::createPostMiddleware'],
                         GroupInterface::PARAM_CONTAINER_CONFIGURATORS => [self::class . '::createPostConfigurator'],
-                        GroupInterface::PARAM_REQUEST_FACTORY         => self::class . '::createRequest',
+                        GroupInterface::PARAM_REQUEST_FACTORY => self::class . '::createRequest',
                     ]);
             });
 
-        $router     = new Router(GroupCountBasedGenerator::class, GroupCountBasedDispatcher::class);
-        $routesData = $router->getCachedRoutes($group);
-
-        return $routesData;
+        $router = new Router(GroupCountBasedGenerator::class, GroupCountBasedDispatcher::class);
+        return $router->getCachedRoutes($group);
     }
 
     /**
      * @return array
-     *
      * @throws ReflectionException
      */
     private function getRoutesDataForNoRequest(): array
     {
         $group = (new Group([
             GroupInterface::PARAM_CONTAINER_CONFIGURATORS => [self::class . '::createPostConfigurator'],
-            GroupInterface::PARAM_REQUEST_FACTORY         => null,
+            GroupInterface::PARAM_REQUEST_FACTORY => null,
         ]))->get('/', [self::class, 'homeIndexNoRequest']);
 
-        $router     = new Router(GroupCountBasedGenerator::class, GroupCountBasedDispatcher::class);
-        $routesData = $router->getCachedRoutes($group);
-
-        return $routesData;
+        $router = new Router(GroupCountBasedGenerator::class, GroupCountBasedDispatcher::class);
+        return $router->getCachedRoutes($group);
     }
 
     /**
      * @return array
+     * @throws ReflectionException
      */
     private function getRoutesDataForErrorsTesting(): array
     {
@@ -458,16 +447,13 @@ class ApplicationTest extends TestCase
                 $group->get('throwable-error-without-handler', self::class . '::handlerThatProducesError');
             });
 
-        $router     = new Router(GroupCountBasedGenerator::class, GroupCountBasedDispatcher::class);
-        $routesData = $router->getCachedRoutes($group);
-
-        return $routesData;
+        $router = new Router(GroupCountBasedGenerator::class, GroupCountBasedDispatcher::class);
+        return $router->getCachedRoutes($group);
     }
 
     /**
-     * @param SapiInterface         $sapi
+     * @param SapiInterface $sapi
      * @param PsrContainerInterface $container
-     *
      * @return ServerRequestInterface
      */
     public static function createRequest(SapiInterface $sapi, PsrContainerInterface $container): ServerRequestInterface
@@ -482,19 +468,16 @@ class ApplicationTest extends TestCase
 
     /**
      * @param ServerRequestInterface $request
-     * @param Closure                $next
-     * @param PsrContainerInterface  $container
-     *
+     * @param Closure $next
+     * @param PsrContainerInterface $container
      * @return ResponseInterface
-     *
      * @throws Exception
      */
     public static function globalMiddlewareItem1(
         ServerRequestInterface $request,
         Closure $next,
         PsrContainerInterface $container
-    ): ResponseInterface
-    {
+    ): ResponseInterface {
         self::assertFalse(self::$isGlobalMiddleware1Called);
         self::assertFalse(self::$isGlobalMiddleware2Called);
 
@@ -508,10 +491,8 @@ class ApplicationTest extends TestCase
 
     /**
      * @param ServerRequestInterface $request
-     * @param Closure                $next
-     *
+     * @param Closure $next
      * @return ResponseInterface
-     *
      * @throws Exception
      */
     public static function globalMiddlewareItem2(ServerRequestInterface $request, Closure $next): ResponseInterface
@@ -526,10 +507,8 @@ class ApplicationTest extends TestCase
 
     /**
      * @param ServerRequestInterface $request
-     * @param Closure                $next
-     *
+     * @param Closure $next
      * @return ResponseInterface
-     *
      * @throws Exception
      */
     public static function faultyMiddlewareItem(ServerRequestInterface $request, Closure $next): ResponseInterface
@@ -541,18 +520,15 @@ class ApplicationTest extends TestCase
 
     /**
      * @param ServerRequestInterface $request
-     * @param Closure                $next
-     * @param PsrContainerInterface  $container
-     *
+     * @param Closure $next
+     * @param PsrContainerInterface $container
      * @return ResponseInterface
      */
     public static function createPostMiddleware(
         ServerRequestInterface $request,
         Closure $next,
         PsrContainerInterface $container
-    ): ResponseInterface
-    {
-
+    ): ResponseInterface {
         $container ?: null;
 
         // dummy for tests
@@ -563,9 +539,7 @@ class ApplicationTest extends TestCase
 
     /**
      * Container configurator.
-     *
      * @param WhoaContainerInterface $container
-     *
      * @return void
      */
     public static function createGlobalConfigurator(WhoaContainerInterface $container): void
@@ -578,9 +552,7 @@ class ApplicationTest extends TestCase
 
     /**
      * Container configurator.
-     *
      * @param WhoaContainerInterface $container
-     *
      * @return void
      */
     public static function createPostConfigurator(WhoaContainerInterface $container): void
@@ -593,9 +565,7 @@ class ApplicationTest extends TestCase
 
     /**
      * Container configurator.
-     *
      * @param WhoaContainerInterface $container
-     *
      * @return void
      */
     public static function configureErrorHandler(WhoaContainerInterface $container): void
@@ -607,41 +577,36 @@ class ApplicationTest extends TestCase
             public function createResponse(
                 Throwable $throwable,
                 PsrContainerInterface $container
-            ): ThrowableResponseInterface
-            {
-                $response = new class ($throwable) extends TextResponse implements ThrowableResponseInterface {
+            ): ThrowableResponseInterface {
+                return new class ($throwable) extends TextResponse implements ThrowableResponseInterface {
                     use ThrowableResponseTrait;
 
                     /**
                      * @param Throwable $throwable
-                     * @param int       $status
+                     * @param int $status
                      */
-                    public function __construct(Throwable $throwable, $status = 500)
+                    public function __construct(Throwable $throwable, int $status = 500)
                     {
                         $text = 'Handled by error handler. ' . (string)$throwable;
                         parent::__construct($text, $status);
                         $this->setThrowable($throwable);
                     }
                 };
-
-                return $response;
             }
         };
     }
 
     /**
-     * @param array                       $params
-     * @param PsrContainerInterface       $container
+     * @param array $params
+     * @param PsrContainerInterface $container
      * @param ServerRequestInterface|null $request
-     *
      * @return ResponseInterface
      */
     public static function homeIndex(
         array $params,
         PsrContainerInterface $container,
         ServerRequestInterface $request = null
-    ): ResponseInterface
-    {
+    ): ResponseInterface {
         // dummy for tests
 
         $params && $request && $container ?: null;
@@ -652,40 +617,34 @@ class ApplicationTest extends TestCase
     }
 
     /**
-     * @param array                       $params
-     * @param PsrContainerInterface       $container
+     * @param array $params
+     * @param PsrContainerInterface $container
      * @param ServerRequestInterface|null $request
-     *
      * @return ResponseInterface
-     *
      * @throws Exception
      */
     public static function handlerThatThrowsException(
         array $params,
         PsrContainerInterface $container,
         ServerRequestInterface $request = null
-    ): ResponseInterface
-    {
+    ): ResponseInterface {
         $params && $request && $container ?: null;
 
         throw new Exception('The handler emulates an error in a Controller.');
     }
 
     /**
-     * @param array                       $params
-     * @param PsrContainerInterface       $container
+     * @param array $params
+     * @param PsrContainerInterface $container
      * @param ServerRequestInterface|null $request
-     *
      * @return ResponseInterface
-     *
      * @throws Exception
      */
     public static function handlerThatProducesError(
         array $params,
         PsrContainerInterface $container,
         ServerRequestInterface $request = null
-    ): ResponseInterface
-    {
+    ): ResponseInterface {
         $params && $request && $container ?: null;
 
         // it will produce PHP syntax error and that's exactly what
@@ -713,21 +672,18 @@ EOT;
     }
 
     /**
-     * @param array                       $params
-     * @param PsrContainerInterface       $container
+     * @param array $params
+     * @param PsrContainerInterface $container
      * @param ServerRequestInterface|null $request
-     *
      * @return ResponseInterface
-     *
      * @throws Exception
      */
     public static function homeIndexNoRequest(
         array $params,
         PsrContainerInterface $container,
         ServerRequestInterface $request = null
-    ): ResponseInterface
-    {
-        // we didn't specified any middleware and request factory was set to null thus request should be null
+    ): ResponseInterface {
+        // we didn't specify any middleware and request factory was set to null thus request should be null
         self::assertNull($request);
 
         // dummy for tests
@@ -739,13 +695,10 @@ EOT;
 
     /**
      * @param StreamInterface $stream
-     *
      * @return string
      */
     private function getText(StreamInterface $stream): string
     {
-        $text = $stream->read($stream->getSize());
-
-        return $text;
+        return $stream->read($stream->getSize());
     }
 }

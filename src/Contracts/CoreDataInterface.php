@@ -27,23 +27,23 @@ namespace Whoa\Core\Contracts;
 interface CoreDataInterface
 {
     /** Settings key for router parameters */
-    const KEY_ROUTER_PARAMS = 0;
+    public const KEY_ROUTER_PARAMS = 0;
 
     /** Settings key for router internal data generator */
-    const KEY_ROUTER_PARAMS__GENERATOR = 0;
+    public const KEY_ROUTER_PARAMS__GENERATOR = 0;
 
     /** Settings key for router dispatcher */
-    const KEY_ROUTER_PARAMS__DISPATCHER = self::KEY_ROUTER_PARAMS__GENERATOR + 1;
+    public const KEY_ROUTER_PARAMS__DISPATCHER = self::KEY_ROUTER_PARAMS__GENERATOR + 1;
 
     /** Settings key for routing data */
-    const KEY_ROUTES_DATA = self::KEY_ROUTER_PARAMS + 1;
+    public const KEY_ROUTES_DATA = self::KEY_ROUTER_PARAMS + 1;
 
     /** Settings key for routing data */
-    const KEY_GLOBAL_CONTAINER_CONFIGURATORS = self::KEY_ROUTES_DATA + 1;
+    public const KEY_GLOBAL_CONTAINER_CONFIGURATORS = self::KEY_ROUTES_DATA + 1;
 
     /** Settings key for routing data */
-    const KEY_GLOBAL_MIDDLEWARE = self::KEY_GLOBAL_CONTAINER_CONFIGURATORS + 1;
+    public const KEY_GLOBAL_MIDDLEWARE = self::KEY_GLOBAL_CONTAINER_CONFIGURATORS + 1;
 
     /** Special key which could be used by developers to safely add their own keys */
-    const KEY_LAST = self::KEY_GLOBAL_MIDDLEWARE;
+    public const KEY_LAST = self::KEY_GLOBAL_MIDDLEWARE;
 }

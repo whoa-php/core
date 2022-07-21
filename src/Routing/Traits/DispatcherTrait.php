@@ -26,14 +26,12 @@ use Whoa\Contracts\Routing\DispatcherInterface;
 
 /**
  * @package Whoa\Core
- *
  * @method dispatch(string $method, string $uri): array
  */
 trait DispatcherTrait
 {
     /**
      * Validate implementation code match with FasRoute ones.
-     *
      * @return bool
      */
     protected function areCodeValid(): bool

@@ -41,6 +41,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use ReflectionException;
 use Throwable;
+
 use function assert;
 use function call_user_func;
 use function count;
@@ -48,15 +49,13 @@ use function implode;
 
 /**
  * @package Whoa\Core
- *
- * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 abstract class Application implements ApplicationInterface
 {
     use CheckCallableTrait;
 
     /** Method name for default request factory. */
-    const FACTORY_METHOD = 'defaultRequestFactory';
+    public const FACTORY_METHOD = 'defaultRequestFactory';
 
     /** HTTP error code for default error response. */
     protected const DEFAULT_HTTP_ERROR_CODE = 500;
@@ -64,12 +63,12 @@ abstract class Application implements ApplicationInterface
     /**
      * @var SapiInterface|null
      */
-    private $sapi;
+    private ?SapiInterface $sapi = null;
 
     /**
      * @var RouterInterface|null
      */
-    private $router = null;
+    private ?RouterInterface $router = null;
 
     /**
      * @return array
@@ -93,9 +92,7 @@ abstract class Application implements ApplicationInterface
 
     /**
      * @inheritdoc
-     *
-     * @SuppressWarnings(PHPMD.StaticAccess)
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @throws ContainerExceptionInterface
      */
     public function run(): void
     {
@@ -110,13 +107,18 @@ abstract class Application implements ApplicationInterface
 
             // match route from `Request` to handler, route container configurators/middleware, etc
             [
-                $matchCode, $allowedMethods, $handlerParams, $handler,
-                $routeMiddleware, $routeConfigurators, $requestFactory
+                $matchCode,
+                $allowedMethods,
+                $handlerParams,
+                $handler,
+                $routeMiddleware,
+                $routeConfigurators,
+                $requestFactory
             ] = $this->initRouter($coreData)
                 ->match($this->sapi->getMethod(), $this->sapi->getUri()->getPath());
 
             // configure container
-            $container           = $this->createContainerInstance();
+            $container = $this->createContainerInstance();
             $globalConfigurators = BaseCoreData::getGlobalConfiguratorsFromData($coreData);
             $this->configureContainer($container, $globalConfigurators, $routeConfigurators);
 
@@ -137,7 +139,7 @@ abstract class Application implements ApplicationInterface
             }
 
             $globalMiddleware = BaseCoreData::getGlobalMiddlewareFromData($coreData);
-            $hasMiddleware    = empty($globalMiddleware) === false || empty($routeMiddleware) === false;
+            $hasMiddleware = empty($globalMiddleware) === false || empty($routeMiddleware) === false;
 
             $handler = $hasMiddleware === true ?
                 $this->addMiddlewareChain($handler, $container, $globalMiddleware, $routeMiddleware) : $handler;
@@ -145,7 +147,11 @@ abstract class Application implements ApplicationInterface
             $request =
                 $requestFactory === null && $hasMiddleware === false && $matchCode === RouterInterface::MATCH_FOUND ?
                     null :
-                    $this->createRequest($this->sapi, $container, $requestFactory ?? static::getDefaultRequestFactory());
+                    $this->createRequest(
+                        $this->sapi,
+                        $container,
+                        $requestFactory ?? static::getDefaultRequestFactory()
+                    );
 
             // Execute the pipeline by sending `Request` down all middleware (global then route's then
             // terminal handler in `Controller` and back) and then send `Response` to SAPI
@@ -165,7 +171,6 @@ abstract class Application implements ApplicationInterface
 
     /**
      * @param SapiInterface $sapi
-     *
      * @return ServerRequestInterface
      */
     public static function defaultRequestFactory(SapiInterface $sapi): ServerRequestInterface
@@ -185,37 +190,29 @@ abstract class Application implements ApplicationInterface
     }
 
     /**
-     * @param Closure               $handler
+     * @param Closure $handler
      * @param RequestInterface|null $request
-     *
      * @return ResponseInterface
      */
     protected function handleRequest(Closure $handler, ?RequestInterface $request): ResponseInterface
     {
-        $response = call_user_func($handler, $request);
-
-        return $response;
+        return call_user_func($handler, $request);
     }
 
     /**
-     * @param Throwable                  $throwable
+     * @param Throwable $throwable
      * @param null|PsrContainerInterface $container
-     *
      * @return ThrowableResponseInterface
-     *
      * @throws ContainerExceptionInterface
-     *
-     * @SuppressWarnings(PHPMD.ElseExpression)
      */
     protected function handleThrowable(
         Throwable $throwable,
         ?PsrContainerInterface $container
-    ): ThrowableResponseInterface
-    {
+    ): ThrowableResponseInterface {
         if ($container !== null && $container->has(ThrowableHandlerInterface::class) === true) {
             /** @var ThrowableHandlerInterface $handler */
-            /** @noinspection PhpUnhandledExceptionInspection */
-            $handler  = $container->get(ThrowableHandlerInterface::class);
+
+            $handler = $container->get(ThrowableHandlerInterface::class);
             $response = $handler->createResponse($throwable, $container);
         } else {
             $response = $this->createDefaultThrowableResponse($throwable);
@@ -225,32 +222,28 @@ abstract class Application implements ApplicationInterface
     }
 
     /**
-     * @param int   $status
+     * @param int $status
      * @param array $headers
-     *
      * @return ResponseInterface
      */
-    protected function createEmptyResponse($status = 204, array $headers = []): ResponseInterface
+    protected function createEmptyResponse(int $status = 204, array $headers = []): ResponseInterface
     {
-        $response = new EmptyResponse($status, $headers);
-
-        return $response;
+        return new EmptyResponse($status, $headers);
     }
 
     /**
      * @param Throwable $throwable
-     *
      * @return ThrowableResponseInterface
      */
     protected function createDefaultThrowableResponse(Throwable $throwable): ThrowableResponseInterface
     {
-        $status   = static::DEFAULT_HTTP_ERROR_CODE;
-        $response = new class ($throwable, $status) extends TextResponse implements ThrowableResponseInterface {
+        $status = static::DEFAULT_HTTP_ERROR_CODE;
+        return new class ($throwable, $status) extends TextResponse implements ThrowableResponseInterface {
             use ThrowableResponseTrait;
 
             /**
              * @param Throwable $throwable
-             * @param int       $status
+             * @param int $status
              */
             public function __construct(Throwable $throwable, int $status)
             {
@@ -258,8 +251,6 @@ abstract class Application implements ApplicationInterface
                 $this->setThrowable($throwable);
             }
         };
-
-        return $response;
     }
 
     /**
@@ -272,19 +263,16 @@ abstract class Application implements ApplicationInterface
 
     /**
      * @param WhoaContainerInterface $container
-     * @param callable[]|null        $globalConfigurators
-     * @param callable[]|null        $routeConfigurators
-     *
+     * @param callable[]|null $globalConfigurators
+     * @param callable[]|null $routeConfigurators
      * @return void
-     *
      * @throws ReflectionException
      */
     protected function configureContainer(
         WhoaContainerInterface $container,
         array $globalConfigurators = null,
         array $routeConfigurators = null
-    ): void
-    {
+    ): void {
         if (empty($globalConfigurators) === false) {
             foreach ($globalConfigurators as $configurator) {
                 assert($this->checkPublicStaticCallable($configurator, [WhoaContainerInterface::class]));
@@ -300,13 +288,11 @@ abstract class Application implements ApplicationInterface
     }
 
     /**
-     * @param Closure               $handler
+     * @param Closure $handler
      * @param PsrContainerInterface $container
-     * @param array|null            $globalMiddleware
-     * @param array|null            $routeMiddleware
-     *
+     * @param array|null $globalMiddleware
+     * @param array|null $routeMiddleware
      * @return Closure
-     *
      * @throws ReflectionException
      */
     protected function addMiddlewareChain(
@@ -314,22 +300,17 @@ abstract class Application implements ApplicationInterface
         PsrContainerInterface $container,
         array $globalMiddleware,
         array $routeMiddleware = null
-    ): Closure
-    {
+    ): Closure {
         $handler = $this->createMiddlewareChainImpl($handler, $container, $routeMiddleware);
-        $handler = $this->createMiddlewareChainImpl($handler, $container, $globalMiddleware);
-
-        return $handler;
+        return $this->createMiddlewareChainImpl($handler, $container, $globalMiddleware);
     }
 
     /**
-     * @param callable                    $handler
-     * @param array                       $handlerParams
-     * @param PsrContainerInterface       $container
+     * @param callable $handler
+     * @param array $handlerParams
+     * @param PsrContainerInterface $container
      * @param ServerRequestInterface|null $request
-     *
      * @return ResponseInterface
-     *
      * @throws ReflectionException
      */
     protected function callHandler(
@@ -337,8 +318,7 @@ abstract class Application implements ApplicationInterface
         array $handlerParams,
         PsrContainerInterface $container,
         ServerRequestInterface $request = null
-    ): ResponseInterface
-    {
+    ): ResponseInterface {
         // check the handler method signature
         assert(
             $this->checkPublicStaticCallable(
@@ -350,23 +330,18 @@ abstract class Application implements ApplicationInterface
             '`public static methodName(array, PsrContainerInterface, ServerRequestInterface): ResponseInterface`'
         );
 
-        $response = call_user_func($handler, $handlerParams, $container, $request);
-
-        return $response;
+        return call_user_func($handler, $handlerParams, $container, $request);
     }
 
     /**
      * @param array $coreData
-     *
      * @return RouterInterface
-     *
-     * @SuppressWarnings(PHPMD.StaticAccess)
      */
     protected function initRouter(array $coreData): RouterInterface
     {
-        $routerParams    = BaseCoreData::getRouterParametersFromData($coreData);
-        $routesData      = BaseCoreData::getRoutesDataFromData($coreData);
-        $generatorClass  = BaseCoreData::getGeneratorFromParametersData($routerParams);
+        $routerParams = BaseCoreData::getRouterParametersFromData($coreData);
+        $routesData = BaseCoreData::getRoutesDataFromData($coreData);
+        $generatorClass = BaseCoreData::getGeneratorFromParametersData($routerParams);
         $dispatcherClass = BaseCoreData::getDispatcherFromParametersData($routerParams);
 
         $this->router = new Router($generatorClass, $dispatcherClass);
@@ -376,18 +351,16 @@ abstract class Application implements ApplicationInterface
     }
 
     /**
-     * @param callable              $handler
-     * @param array                 $handlerParams
+     * @param callable $handler
+     * @param array $handlerParams
      * @param PsrContainerInterface $container
-     *
      * @return Closure
      */
     protected function createHandler(
         callable $handler,
         array $handlerParams,
         PsrContainerInterface $container
-    ): Closure
-    {
+    ): Closure {
         return function (ServerRequestInterface $request = null) use (
             $handler,
             $handlerParams,
@@ -402,20 +375,17 @@ abstract class Application implements ApplicationInterface
     }
 
     /**
-     * @param SapiInterface         $sapi
+     * @param SapiInterface $sapi
      * @param PsrContainerInterface $container
-     * @param callable              $requestFactory
-     *
+     * @param callable $requestFactory
      * @return ServerRequestInterface
-     *
      * @throws ReflectionException
      */
     private function createRequest(
         SapiInterface $sapi,
         PsrContainerInterface $container,
         callable $requestFactory
-    ): ServerRequestInterface
-    {
+    ): ServerRequestInterface {
         // check the factory method signature
         assert(
             $this->checkPublicStaticCallable(
@@ -427,14 +397,11 @@ abstract class Application implements ApplicationInterface
             '`public static methodName(SapiInterface, PsrContainerInterface): ServerRequestInterface`'
         );
 
-        $request = call_user_func($requestFactory, $sapi, $container);
-
-        return $request;
+        return call_user_func($requestFactory, $sapi, $container);
     }
 
     /**
      * @param array $allowedMethods
-     *
      * @return Closure
      */
     private function createMethodNotAllowedTerminalHandler(array $allowedMethods): Closure
@@ -457,20 +424,17 @@ abstract class Application implements ApplicationInterface
     }
 
     /**
-     * @param Closure               $handler
+     * @param Closure $handler
      * @param PsrContainerInterface $container
-     * @param array|null            $middleware
-     *
+     * @param array|null $middleware
      * @return Closure
-     *
      * @throws ReflectionException
      */
     private function createMiddlewareChainImpl(
         Closure $handler,
         PsrContainerInterface $container,
         array $middleware = null
-    ): Closure
-    {
+    ): Closure {
         if (empty($middleware) === false) {
             $start = count($middleware) - 1;
             for ($index = $start; $index >= 0; $index--) {
@@ -482,20 +446,17 @@ abstract class Application implements ApplicationInterface
     }
 
     /**
-     * @param Closure               $next
-     * @param callable              $middleware
+     * @param Closure $next
+     * @param callable $middleware
      * @param PsrContainerInterface $container
-     *
      * @return Closure
-     *
      * @throws ReflectionException
      */
     private function createMiddlewareChainLink(
         Closure $next,
         callable $middleware,
         PsrContainerInterface $container
-    ): Closure
-    {
+    ): Closure {
         // check the middleware method signature
         assert(
             $this->checkPublicStaticCallable(

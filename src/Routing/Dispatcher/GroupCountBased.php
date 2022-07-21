@@ -32,7 +32,7 @@ class GroupCountBased extends \FastRoute\Dispatcher\GroupCountBased implements D
 {
     use DispatcherTrait;
 
-    /** @noinspection PhpMissingParentConstructorInspection
+    /**
      * Constructor.
      */
     public function __construct()

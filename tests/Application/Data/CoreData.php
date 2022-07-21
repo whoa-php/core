@@ -33,36 +33,36 @@ class CoreData extends BaseCoreData
     /**
      * @var array
      */
-    private $routerParameters = [
-        self::KEY_ROUTER_PARAMS__GENERATOR  => GroupCountBasedGenerator::class,
+    private array $routerParameters = [
+        self::KEY_ROUTER_PARAMS__GENERATOR => GroupCountBasedGenerator::class,
         self::KEY_ROUTER_PARAMS__DISPATCHER => GroupCountBasedDispatcher::class,
     ];
 
     /**
      * @var array
      */
-    private $routesData = [];
+    private array $routesData = [];
 
     /**
      * @var array
      */
-    private $globalConfigurators = [];
+    private array $globalConfigurators = [];
 
     /**
      * @var array
      */
-    private $globalMiddleware = [];
+    private array $globalMiddleware = [];
 
     /**
-     * @inheritdoc
+     * @return array
      */
     public function get(): array
     {
         return [
-            self::KEY_ROUTER_PARAMS                  => $this->getRouterParameters(),
-            self::KEY_ROUTES_DATA                    => $this->getRoutesData(),
+            self::KEY_ROUTER_PARAMS => $this->getRouterParameters(),
+            self::KEY_ROUTES_DATA => $this->getRoutesData(),
             self::KEY_GLOBAL_CONTAINER_CONFIGURATORS => $this->getGlobalConfigurators(),
-            self::KEY_GLOBAL_MIDDLEWARE              => $this->getGlobalMiddleware(),
+            self::KEY_GLOBAL_MIDDLEWARE => $this->getGlobalMiddleware(),
         ];
     }
 
@@ -76,7 +76,6 @@ class CoreData extends BaseCoreData
 
     /**
      * @param array $routerParameters
-     *
      * @return CoreData
      */
     public function setRouterParameters(array $routerParameters): CoreData
@@ -96,7 +95,6 @@ class CoreData extends BaseCoreData
 
     /**
      * @param array $routesData
-     *
      * @return CoreData
      */
     public function setRoutesData(array $routesData): CoreData
@@ -116,7 +114,6 @@ class CoreData extends BaseCoreData
 
     /**
      * @param array $globalConfigurators
-     *
      * @return CoreData
      */
     public function setGlobalConfigurators(array $globalConfigurators): CoreData
@@ -136,7 +133,6 @@ class CoreData extends BaseCoreData
 
     /**
      * @param array $globalMiddleware
-     *
      * @return CoreData
      */
     public function setGlobalMiddleware(array $globalMiddleware): CoreData

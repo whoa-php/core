@@ -42,10 +42,8 @@ class NestedGroup extends BaseGroup
     public function getName(): ?string
     {
         $parentGroupName = $this->parentGroup()->getName();
-        $selfName        = parent::getName();
-        $result          = $parentGroupName !== null || $selfName !== null ? $parentGroupName . $selfName : null;
-
-        return $result;
+        $selfName = parent::getName();
+        return $parentGroupName !== null || $selfName !== null ? $parentGroupName . $selfName : null;
     }
 
     /**
@@ -53,8 +51,6 @@ class NestedGroup extends BaseGroup
      */
     protected function createGroup(): BaseGroup
     {
-        $group = (new static($this))->setHasTrailSlash($this->hasTrailSlash());
-
-        return $group;
+        return (new static($this))->setHasTrailSlash($this->hasTrailSlash());
     }
 }

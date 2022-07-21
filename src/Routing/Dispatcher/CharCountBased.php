@@ -32,7 +32,7 @@ class CharCountBased extends \FastRoute\Dispatcher\CharCountBased implements Dis
 {
     use DispatcherTrait;
 
-    /** @noinspection PhpMissingParentConstructorInspection
+    /**
      * Constructor.
      */
     public function __construct()

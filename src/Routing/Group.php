@@ -21,7 +21,9 @@ declare(strict_types=1);
 
 namespace Whoa\Core\Routing;
 
+use ReflectionException;
 use Whoa\Contracts\Routing\GroupInterface;
+
 use function assert;
 
 /**
@@ -31,6 +33,7 @@ class Group extends BaseGroup
 {
     /**
      * @param array $parameters
+     * @throws ReflectionException
      */
     public function __construct(array $parameters = [])
     {
@@ -69,8 +72,6 @@ class Group extends BaseGroup
      */
     protected function createGroup(): BaseGroup
     {
-        $group = (new NestedGroup($this))->setHasTrailSlash($this->hasTrailSlash());
-
-        return $group;
+        return (new NestedGroup($this))->setHasTrailSlash($this->hasTrailSlash());
     }
 }

@@ -45,7 +45,6 @@ class GroupTest extends TestCase
 
     /**
      * Test basic groups.
-     *
      * @throws Exception
      */
     public function testBasicGroups(): void
@@ -73,7 +72,7 @@ class GroupTest extends TestCase
             /** @var RI $route */
             $routes[] = $route;
         }
-        /** @noinspection PhpParamsInspection */
+
         $this->assertCount(6, $routes);
 
         $this->assertEquals('GET', $routes[0]->getMethod());
@@ -127,15 +126,14 @@ class GroupTest extends TestCase
 
     /**
      * Test advanced groups.
-     *
      * @throws Exception
      */
     public function testAdvancedGroups(): void
     {
         $topGroup = (new Group([
-            GI::PARAM_MIDDLEWARE_LIST         => [self::class . '::topMiddlewareHandler'],
+            GI::PARAM_MIDDLEWARE_LIST => [self::class . '::topMiddlewareHandler'],
             GI::PARAM_CONTAINER_CONFIGURATORS => [[self::class, 'topContainerConfigurator']],
-            GI::PARAM_REQUEST_FACTORY         => null,
+            GI::PARAM_REQUEST_FACTORY => null,
         ]))->setUriPrefix('/api/v1');
 
         $topGroup
@@ -146,9 +144,9 @@ class GroupTest extends TestCase
                     $group
                         ->put('/', [self::class, 'postsCreate'])
                         ->patch('/', self::class . '::postsUpdate', [
-                            RI::PARAM_MIDDLEWARE_LIST         => [self::class . '::methodMiddlewareHandler'],
+                            RI::PARAM_MIDDLEWARE_LIST => [self::class . '::methodMiddlewareHandler'],
                             RI::PARAM_CONTAINER_CONFIGURATORS => [self::class . '::methodContainerConfigurator'],
-                            RI::PARAM_REQUEST_FACTORY         => self::class . '::patchRequestFactory',
+                            RI::PARAM_REQUEST_FACTORY => self::class . '::patchRequestFactory',
                         ])->get('/search', [self::class, 'postsSearch'])
                         ->delete('/kill-all/', [self::class, 'postsDeleteAll']);
 
@@ -169,7 +167,7 @@ class GroupTest extends TestCase
             /** @var RI $route */
             $routes[] = $route;
         }
-        /** @noinspection PhpParamsInspection */
+
         $this->assertCount(6, $routes);
 
         $this->assertEquals('GET', $routes[0]->getMethod());
@@ -225,7 +223,6 @@ class GroupTest extends TestCase
 
     /**
      * Test trailing slashes enabled.
-     *
      * @throws Exception
      */
     public function testEnabledTrailingSlashes(): void
@@ -257,7 +254,7 @@ class GroupTest extends TestCase
             /** @var RI $route */
             $routes[] = $route;
         }
-        /** @noinspection PhpParamsInspection */
+
         $this->assertCount(9, $routes);
 
         $this->assertEquals('/', $routes[0]->getUriPath());
@@ -273,6 +270,7 @@ class GroupTest extends TestCase
 
     /**
      * Test invalid callable.
+     * @throws ReflectionException
      */
     public function testInvalidCallable1(): void
     {
@@ -283,6 +281,7 @@ class GroupTest extends TestCase
 
     /**
      * Test invalid callable.
+     * @throws ReflectionException
      */
     public function testInvalidCallable2(): void
     {
@@ -293,6 +292,7 @@ class GroupTest extends TestCase
 
     /**
      * Test invalid callable.
+     * @throws ReflectionException
      */
     public function testInvalidCallable3(): void
     {
@@ -304,7 +304,6 @@ class GroupTest extends TestCase
 
     /**
      * Test invalid callable.
-     *
      * @throws ReflectionException
      */
     public function testInvalidCallable4(): void
@@ -317,7 +316,6 @@ class GroupTest extends TestCase
 
     /**
      * Test invalid callable.
-     *
      * @throws ReflectionException
      */
     public function testInvalidCallable5(): void
@@ -333,7 +331,6 @@ class GroupTest extends TestCase
 
     /**
      * Test invalid callable.
-     *
      * @throws ReflectionException
      */
     public function testInvalidCallable6(): void
@@ -349,7 +346,6 @@ class GroupTest extends TestCase
 
     /**
      * Test invalid callable.
-     *
      * @throws ReflectionException
      */
     public function testInvalidCallable7(): void
@@ -372,9 +368,7 @@ class GroupTest extends TestCase
     public static function homeIndex(): ResponseInterface
     {
         /** @var ResponseInterface $response */
-        $response = Mockery::mock(ResponseInterface::class);
-
-        return $response;
+        return Mockery::mock(ResponseInterface::class);
     }
 
     /**
@@ -383,9 +377,7 @@ class GroupTest extends TestCase
     public static function postsIndex(): ResponseInterface
     {
         /** @var ResponseInterface $response */
-        $response = Mockery::mock(ResponseInterface::class);
-
-        return $response;
+        return Mockery::mock(ResponseInterface::class);
     }
 
     /**
@@ -394,9 +386,7 @@ class GroupTest extends TestCase
     public static function postsCreate(): ResponseInterface
     {
         /** @var ResponseInterface $response */
-        $response = Mockery::mock(ResponseInterface::class);
-
-        return $response;
+        return Mockery::mock(ResponseInterface::class);
     }
 
     /**
@@ -405,9 +395,7 @@ class GroupTest extends TestCase
     public static function postsUpdate(): ResponseInterface
     {
         /** @var ResponseInterface $response */
-        $response = Mockery::mock(ResponseInterface::class);
-
-        return $response;
+        return Mockery::mock(ResponseInterface::class);
     }
 
     /**
@@ -416,9 +404,7 @@ class GroupTest extends TestCase
     public static function postEdit(): ResponseInterface
     {
         /** @var ResponseInterface $response */
-        $response = Mockery::mock(ResponseInterface::class);
-
-        return $response;
+        return Mockery::mock(ResponseInterface::class);
     }
 
     /**
@@ -427,9 +413,7 @@ class GroupTest extends TestCase
     public static function postsSearch(): ResponseInterface
     {
         /** @var ResponseInterface $response */
-        $response = Mockery::mock(ResponseInterface::class);
-
-        return $response;
+        return Mockery::mock(ResponseInterface::class);
     }
 
     /**
@@ -438,9 +422,7 @@ class GroupTest extends TestCase
     public static function postsDelete(): ResponseInterface
     {
         /** @var ResponseInterface $response */
-        $response = Mockery::mock(ResponseInterface::class);
-
-        return $response;
+        return Mockery::mock(ResponseInterface::class);
     }
 
     /**
@@ -449,9 +431,7 @@ class GroupTest extends TestCase
     public static function postsDeleteAll(): ResponseInterface
     {
         /** @var ResponseInterface $response */
-        $response = Mockery::mock(ResponseInterface::class);
-
-        return $response;
+        return Mockery::mock(ResponseInterface::class);
     }
 
     /**
@@ -460,14 +440,11 @@ class GroupTest extends TestCase
     public static function createNews(): ResponseInterface
     {
         /** @var ResponseInterface $response */
-        $response = Mockery::mock(ResponseInterface::class);
-
-        return $response;
+        return Mockery::mock(ResponseInterface::class);
     }
 
     /**
      * @param SapiInterface $sapi
-     *
      * @return ServerRequestInterface
      */
     public static function requestFactory(SapiInterface $sapi): ServerRequestInterface
@@ -475,14 +452,11 @@ class GroupTest extends TestCase
         $sapi ?: null;
 
         /** @var ServerRequestInterface $request */
-        $request = Mockery::mock(ServerRequestInterface::class);
-
-        return $request;
+        return Mockery::mock(ServerRequestInterface::class);
     }
 
     /**
      * @param SapiInterface $sapi
-     *
      * @return ServerRequestInterface
      */
     public static function patchRequestFactory(SapiInterface $sapi): ServerRequestInterface
@@ -490,15 +464,12 @@ class GroupTest extends TestCase
         $sapi ?: null;
 
         /** @var ServerRequestInterface $request */
-        $request = Mockery::mock(ServerRequestInterface::class);
-
-        return $request;
+        return Mockery::mock(ServerRequestInterface::class);
     }
 
     /**
      * @param ServerRequestInterface $request
-     * @param Closure                $next
-     *
+     * @param Closure $next
      * @return ResponseInterface
      */
     public static function topMiddlewareHandler(ServerRequestInterface $request, Closure $next): ResponseInterface
@@ -506,9 +477,7 @@ class GroupTest extends TestCase
         assert($request || $next);
 
         /** @var ResponseInterface $response */
-        $response = Mockery::mock(ResponseInterface::class);
-
-        return $response;
+        return Mockery::mock(ResponseInterface::class);
     }
 
     public static function topContainerConfigurator()
@@ -522,9 +491,7 @@ class GroupTest extends TestCase
     public static function groupMiddlewareHandler(): ResponseInterface
     {
         /** @var ResponseInterface $response */
-        $response = Mockery::mock(ResponseInterface::class);
-
-        return $response;
+        return Mockery::mock(ResponseInterface::class);
     }
 
     public static function groupContainerConfigurator()
@@ -538,9 +505,7 @@ class GroupTest extends TestCase
     public static function methodMiddlewareHandler(): ResponseInterface
     {
         /** @var ResponseInterface $response */
-        $response = Mockery::mock(ResponseInterface::class);
-
-        return $response;
+        return Mockery::mock(ResponseInterface::class);
     }
 
     public static function methodContainerConfigurator(): void

@@ -34,16 +34,20 @@ use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use ReflectionException;
+
 use function array_merge;
 
 /**
  * @package Whoa\Core
- *
- * @SuppressWarnings(PHPMD.LongVariable)
  */
 class Route implements RouteInterface
 {
-    use CallableTrait, UriTrait, HasConfiguratorsTrait, HasMiddlewareTrait, HasRequestFactoryTrait, CheckCallableTrait {
+    use CallableTrait;
+    use UriTrait;
+    use HasConfiguratorsTrait;
+    use HasMiddlewareTrait;
+    use HasRequestFactoryTrait;
+    use CheckCallableTrait {
         CheckCallableTrait::checkPublicStaticCallable insteadof HasMiddlewareTrait;
         CheckCallableTrait::checkPublicStaticCallable insteadof HasConfiguratorsTrait;
         CheckCallableTrait::checkPublicStaticCallable insteadof HasRequestFactoryTrait;
@@ -52,17 +56,17 @@ class Route implements RouteInterface
     /**
      * @var GroupInterface
      */
-    private $group;
+    private GroupInterface $group;
 
     /**
      * @var string
      */
-    private $method;
+    private string $method;
 
     /**
      * @var string
      */
-    private $uriPath;
+    private string $uriPath;
 
     /**
      * @var callable
@@ -72,25 +76,24 @@ class Route implements RouteInterface
     /**
      * @var bool
      */
-    private $isGroupRequestFactory = true;
+    private bool $isGroupRequestFactory = true;
 
     /**
      * @var string|null
      */
-    private $name;
+    private ?string $name;
 
     /**
      * @param GroupInterface $group
-     * @param string         $method
-     * @param string         $uriPath
-     * @param callable       $handler
-     *
+     * @param string $method
+     * @param string $uriPath
+     * @param callable $handler
      * @throws ReflectionException
      */
     public function __construct(GroupInterface $group, string $method, string $uriPath, callable $handler)
     {
-        $this->group   = $group;
-        $this->method  = $method;
+        $this->group = $group;
+        $this->method = $method;
         $this->uriPath = $uriPath;
 
         $this->setHandler($handler);
@@ -98,7 +101,6 @@ class Route implements RouteInterface
 
     /**
      * @param string|null $name
-     *
      * @return self
      */
     public function setName(string $name = null): self
@@ -180,7 +182,6 @@ class Route implements RouteInterface
 
     /**
      * @param bool $isGroupFactory
-     *
      * @return self
      */
     public function setUseGroupRequestFactory(bool $isGroupFactory): self
@@ -195,16 +196,12 @@ class Route implements RouteInterface
      */
     public function getName(): ?string
     {
-        $result = $this->name !== null ? (string)$this->getGroup()->getName() . $this->name : null;
-
-        return $result;
+        return $this->name !== null ? (string)$this->getGroup()->getName() . $this->name : null;
     }
 
     /**
      * @param callable $handler
-     *
      * @return self
-     *
      * @throws ReflectionException
      */
     protected function setHandler(callable $handler): self

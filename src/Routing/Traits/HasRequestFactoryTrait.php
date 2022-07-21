@@ -21,6 +21,7 @@ declare(strict_types=1);
 
 namespace Whoa\Core\Routing\Traits;
 
+use ReflectionException;
 use Whoa\Contracts\Core\SapiInterface;
 use Whoa\Core\Application\Application;
 use LogicException;
@@ -41,8 +42,8 @@ trait HasRequestFactoryTrait
 
     /**
      * @param callable|null $requestFactory
-     *
      * @return self
+     * @throws ReflectionException
      */
     public function setRequestFactory(callable $requestFactory = null): self
     {
@@ -60,15 +61,13 @@ trait HasRequestFactoryTrait
     /**
      * @return bool
      */
-    protected function isRequestFactorySet()
+    protected function isRequestFactorySet(): bool
     {
         return $this->requestFactory !== false;
     }
 
     /**
      * @return callable
-     *
-     * @SuppressWarnings(PHPMD.StaticAccess)
      */
     protected function getDefaultRequestFactory(): callable
     {

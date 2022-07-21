@@ -31,17 +31,19 @@ use Whoa\Core\Routing\Traits\HasMiddlewareTrait;
 use Whoa\Core\Routing\Traits\HasRequestFactoryTrait;
 use Whoa\Core\Routing\Traits\UriTrait;
 use ReflectionException;
+
 use function array_key_exists;
 use function array_merge;
 
 /**
  * @package Whoa\Core
- *
- * @SuppressWarnings(PHPMD.TooManyPublicMethods)
  */
 abstract class BaseGroup implements GroupInterface
 {
-    use CallableTrait, UriTrait, HasRequestFactoryTrait, CheckCallableTrait;
+    use CallableTrait;
+    use CheckCallableTrait;
+    use HasRequestFactoryTrait;
+    use UriTrait;
 
     use HasMiddlewareTrait {
         addMiddleware as private addMiddlewareImpl;
@@ -52,32 +54,32 @@ abstract class BaseGroup implements GroupInterface
     }
 
     /** Default value if routes should use request factory from its group */
-    const USE_FACTORY_FROM_GROUP_DEFAULT = true;
+    public const USE_FACTORY_FROM_GROUP_DEFAULT = true;
 
     /**
      * @var null|GroupInterface
      */
-    private $parent;
+    private ?GroupInterface $parent = null;
 
     /**
      * @var string
      */
-    private $uriPrefix = '';
+    private string $uriPrefix = '';
 
     /**
      * @var string|null
      */
-    private $name = null;
+    private ?string $name = null;
 
     /**
      * @var array
      */
-    private $items = [];
+    private array $items = [];
 
     /**
      * @var bool
      */
-    private $trailSlashes = false;
+    private bool $trailSlashes = false;
 
     /**
      * @return self
@@ -86,10 +88,9 @@ abstract class BaseGroup implements GroupInterface
 
     /**
      * @param GroupInterface $parent
-     *
      * @return $this
      */
-    public function setParentGroup(GroupInterface $parent)
+    public function setParentGroup(GroupInterface $parent): BaseGroup
     {
         $this->parent = $parent;
 
@@ -98,7 +99,6 @@ abstract class BaseGroup implements GroupInterface
 
     /**
      * @param string $uriPrefix
-     *
      * @return self
      */
     public function setUriPrefix(string $uriPrefix): self
@@ -110,7 +110,6 @@ abstract class BaseGroup implements GroupInterface
 
     /**
      * @param string $name
-     *
      * @return self
      */
     public function setName(string $name): self
@@ -132,7 +131,6 @@ abstract class BaseGroup implements GroupInterface
 
     /**
      * @param bool $trailSlashes
-     *
      * @return self
      */
     public function setHasTrailSlash(bool $trailSlashes): self
@@ -194,13 +192,12 @@ abstract class BaseGroup implements GroupInterface
      */
     public function getContainerConfigurators(): array
     {
-        $result = array_merge($this->getParentConfigurators(), $this->configurators);
-
-        return $result;
+        return array_merge($this->getParentConfigurators(), $this->configurators);
     }
 
     /**
      * @inheritdoc
+     * @throws ReflectionException
      */
     public function addContainerConfigurators(array $configurators): GroupInterface
     {
@@ -217,9 +214,7 @@ abstract class BaseGroup implements GroupInterface
         }
 
         $parent = $this->parentGroup();
-        $result = $parent === null ? $this->getDefaultRequestFactory() : $parent->getRequestFactory();
-
-        return $result;
+        return $parent === null ? $this->getDefaultRequestFactory() : $parent->getRequestFactory();
     }
 
     /**
@@ -243,6 +238,7 @@ abstract class BaseGroup implements GroupInterface
 
     /**
      * @inheritdoc
+     * @throws ReflectionException
      */
     public function group(string $prefix, Closure $closure, array $parameters = []): GroupInterface
     {
@@ -284,7 +280,6 @@ abstract class BaseGroup implements GroupInterface
 
     /**
      * @inheritdoc
-     *
      * @throws ReflectionException
      */
     public function method(string $method, string $uriPath, callable $handler, array $parameters = []): GroupInterface
@@ -306,7 +301,6 @@ abstract class BaseGroup implements GroupInterface
 
     /**
      * @inheritdoc
-     *
      * @throws ReflectionException
      */
     public function get(string $uriPath, callable $handler, array $parameters = []): GroupInterface
@@ -316,7 +310,6 @@ abstract class BaseGroup implements GroupInterface
 
     /**
      * @inheritdoc
-     *
      * @throws ReflectionException
      */
     public function post(string $uriPath, callable $handler, array $parameters = []): GroupInterface
@@ -326,7 +319,6 @@ abstract class BaseGroup implements GroupInterface
 
     /**
      * @inheritdoc
-     *
      * @throws ReflectionException
      */
     public function put(string $uriPath, callable $handler, array $parameters = []): GroupInterface
@@ -336,7 +328,6 @@ abstract class BaseGroup implements GroupInterface
 
     /**
      * @inheritdoc
-     *
      * @throws ReflectionException
      */
     public function patch(string $uriPath, callable $handler, array $parameters = []): GroupInterface
@@ -346,7 +337,6 @@ abstract class BaseGroup implements GroupInterface
 
     /**
      * @inheritdoc
-     *
      * @throws ReflectionException
      */
     public function delete(string $uriPath, callable $handler, array $parameters = []): GroupInterface
@@ -364,24 +354,19 @@ abstract class BaseGroup implements GroupInterface
 
     /**
      * @param GroupInterface $group
-     * @param string         $method
-     * @param string         $uriPath
-     * @param callable       $handler
-     *
+     * @param string $method
+     * @param string $uriPath
+     * @param callable $handler
      * @return Route
-     *
      * @throws ReflectionException
      */
     protected function createRoute(GroupInterface $group, string $method, string $uriPath, callable $handler): Route
     {
-        $route = (new Route($group, $method, $uriPath, $handler));
-
-        return $route;
+        return (new Route($group, $method, $uriPath, $handler));
     }
 
     /**
      * @param array $parameters
-     *
      * @return array
      */
     protected function normalizeRouteParameters(array $parameters): array
@@ -401,7 +386,6 @@ abstract class BaseGroup implements GroupInterface
 
     /**
      * @param array $parameters
-     *
      * @return array
      */
     protected function normalizeGroupParameters(array $parameters): array
@@ -423,9 +407,7 @@ abstract class BaseGroup implements GroupInterface
     private function getParentUriPrefix(): ?string
     {
         $parent = $this->parentGroup();
-        $result = $parent === null ? null : $parent->getUriPrefix();
-
-        return $result;
+        return $parent === null ? null : $parent->getUriPrefix();
     }
 
     /**
@@ -434,9 +416,7 @@ abstract class BaseGroup implements GroupInterface
     private function getParentMiddleware(): array
     {
         $parent = $this->parentGroup();
-        $result = $parent === null ? [] : $parent->getMiddleware();
-
-        return $result;
+        return $parent === null ? [] : $parent->getMiddleware();
     }
 
     /**
@@ -445,8 +425,6 @@ abstract class BaseGroup implements GroupInterface
     private function getParentConfigurators(): array
     {
         $parent = $this->parentGroup();
-        $result = $parent === null ? [] : $parent->getContainerConfigurators();
-
-        return $result;
+        return $parent === null ? [] : $parent->getContainerConfigurators();
     }
 }

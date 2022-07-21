@@ -25,6 +25,7 @@ use FastRoute\DataGenerator;
 use FastRoute\Dispatcher;
 use Whoa\Common\Reflection\ClassIsTrait;
 use Whoa\Core\Contracts\CoreDataInterface;
+
 use function assert;
 use function array_key_exists;
 
@@ -37,7 +38,6 @@ abstract class BaseCoreData implements CoreDataInterface
 
     /**
      * @param array $data
-     *
      * @return array
      */
     public static function getRouterParametersFromData(array $data): array
@@ -51,7 +51,6 @@ abstract class BaseCoreData implements CoreDataInterface
 
     /**
      * @param array $data
-     *
      * @return string
      */
     public static function getGeneratorFromParametersData(array $data): string
@@ -66,7 +65,6 @@ abstract class BaseCoreData implements CoreDataInterface
 
     /**
      * @param array $data
-     *
      * @return string
      */
     public static function getDispatcherFromParametersData(array $data): string
@@ -81,40 +79,31 @@ abstract class BaseCoreData implements CoreDataInterface
 
     /**
      * @param array $data
-     *
      * @return array
      */
     public static function getRoutesDataFromData(array $data): array
     {
         assert(array_key_exists(self::KEY_ROUTES_DATA, $data));
-        $result = $data[self::KEY_ROUTES_DATA];
-
-        return $result;
+        return $data[self::KEY_ROUTES_DATA];
     }
 
     /**
      * @param array $data
-     *
      * @return callable[]
      */
     public static function getGlobalConfiguratorsFromData(array $data): array
     {
         assert(array_key_exists(self::KEY_GLOBAL_CONTAINER_CONFIGURATORS, $data));
-        $result = $data[self::KEY_GLOBAL_CONTAINER_CONFIGURATORS];
-
-        return $result;
+        return $data[self::KEY_GLOBAL_CONTAINER_CONFIGURATORS];
     }
 
     /**
      * @param array $data
-     *
      * @return array
      */
     public static function getGlobalMiddlewareFromData(array $data): array
     {
         assert(array_key_exists(self::KEY_GLOBAL_MIDDLEWARE, $data));
-        $result = $data[self::KEY_GLOBAL_MIDDLEWARE];
-
-        return $result;
+        return $data[self::KEY_GLOBAL_MIDDLEWARE];
     }
 }
